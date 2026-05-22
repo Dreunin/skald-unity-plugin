@@ -1,5 +1,7 @@
-using System.Threading.Tasks;
+using System;
+using System.Diagnostics;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Skald.Code.Editor
 {
@@ -10,7 +12,17 @@ namespace Skald.Code.Editor
         {
             Debug.Log("Logging in");
             // TODO: Log in
-			SyncWithScaldState.IsLoggedIn = true;
+            try
+            {
+                Process.Start("explorer", "https://skald.dual-daggers.com/sync");
+
+			    SyncWithScaldState.IsLoggedIn = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error during sync: {e.Message}");
+                
+            }
             return null;
         }
 
@@ -19,6 +31,15 @@ namespace Skald.Code.Editor
         {
             Debug.Log("Syncing");
             // TODO: Put sync logic here
+            try
+            {
+                // sync
+            } catch (Exception e)
+            {
+                Debug.LogError($"Error during sync: {e.Message}");
+                //Logout if sync fails
+                SyncWithScaldState.IsLoggedIn = false;
+            }
             return null;
         }
 
