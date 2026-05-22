@@ -1,0 +1,17 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Skald/UI/style.uss?fileID=7433441132597879392&amp;guid=4e9e2ceb9c1e38d4a90440d46ae807ab&amp;type=3#style"/>
+    <ui:VisualElement name="conversation-root" style="position: absolute; left: 0; right: 0; bottom: 0; height: 25%; margin: 16px; padding: 20px 24px 16px; background-color: rgba(10, 10, 10, 0.8); border-radius: 16px; flex-direction: column; row-gap: 12px;">
+        <ui:VisualElement name="speaker-badge" style="position: absolute; top: -14px; left: 12px; padding: 4px 10px; background-color: rgb(44, 44, 44); border-radius: 8px;">
+            <ui:Label name="speaker-name" text="Narrator" style="color: rgb(255, 255, 255); font-size: 14px; -unity-font-style: bold;"/>
+        </ui:VisualElement>
+        <ui:Label name="dialogue-text" text="And so it was that no other person could match their strength." style="color: rgb(255, 255, 255); font-size: 16px; -unity-font-style: normal; white-space: normal; height: 50%;"/>
+        <ui:ScrollView name="choices-scroll" vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" style="max-height: 120px; flex-shrink: 0; width: 100%; height: 50%; justify-content: space-around; align-items: stretch;">
+            <ui:VisualElement name="choices-container" style="flex-direction: column; row-gap: 8px; align-items: stretch; width: 100%;">
+                <ui:Button name="choice-1" text="I&apos;m doing great!" class="choice" style="height: 30px; width: 100%;"/>
+                <ui:Button name="choice-2" text="I can get even stronger!" class="choice" style="height: 30px; width: 100%;"/>
+                <ui:Button name="choice-3" text="I wonder what&apos;s for dinner..." class="choice" style="height: 30px; width: 100%;"/>
+            </ui:VisualElement>
+        </ui:ScrollView>
+        <ui:Button name="continue-button" text="&gt;" style="align-self: flex-end; width: 36px; height: 36px; background-color: rgb(228, 87, 60); color: rgb(255, 255, 255); border-radius: 8px; display: none;"/>
+    </ui:VisualElement>
+</ui:UXML>
