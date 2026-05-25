@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -7,23 +11,117 @@ namespace Skald.Code.Editor
 {
     public class SyncWithScald
     {
-        // Called by the custom inspector when the user clicks Login
-        public Awaitable Login()
-        {
-            Debug.Log("Logging in");
-            // TODO: Log in
-            try
-            {
-                Process.Start("explorer", "https://skald.dual-daggers.com/sync");
+        private static readonly HttpClient HttpClient = new();
+        private const string ApiBaseUrl = "https://skald.dual-daggers.com";
+        private const string ApiInitiateChallengeUrl = "api/engine-challenge/initiate";
+        private static string ApiCheckChallengeUrl(string challengeId) => $"api/engine-challenge/{challengeId}/check";
 
-			    SyncWithScaldState.IsLoggedIn = true;
-            }
-            catch (Exception e)
+        private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(3);
+
+        private const string testUrl = "http://localhost:9999";
+
+        private const string clientId = "unity";
+
+        private static string GetDeviceId()
+        {
+            return "very good id"; // TODO: Replace with some semi-secret local identifier that is constant for this device
+        }
+
+        // Called by the custom inspector when the user clicks Login
+        public async Awaitable Login()
+        {
+            Debug.Log("1");
+            var initiateChallengeResponse = await InitiateChallenge(testUrl);
+            Debug.Log("2");
+            OpenBrowser(initiateChallengeResponse.VerificationUrl);
+            Debug.Log("3");
+            var checkChallengeResponse = await CheckChallenge(initiateChallengeResponse.ChallengeId, DateTime.Parse(initiateChallengeResponse.ExpiresAt), testUrl);
+            Debug.Log("4");
+            SyncWithScaldState.Token = checkChallengeResponse.Token;
+        }
+
+        private async Awaitable<InitiateChallengeResponse> InitiateChallenge(string baseUrl)
+        {
+            var body = new Dictionary<string, string> {
+                {"deviceId", GetDeviceId()},
+                {"requesterName", clientId}
+            };
+
+            Debug.Log($"{baseUrl}/{ApiInitiateChallengeUrl}");
+            Debug.Log("before post");
+            var response = await HttpClient.PostAsync(
+                $"{baseUrl}/{ApiInitiateChallengeUrl}",
+                new FormUrlEncodedContent(body)
+            );
+            Debug.Log("after post");
+            var responseText = await response.Content.ReadAsStringAsync();
+            Debug.Log(responseText);
+
+            if (!response.IsSuccessStatusCode)
             {
-                Debug.LogError($"Error during sync: {e.Message}");
-                
+                throw new Exception(
+                    $"Login failed: {(int)response.StatusCode}"
+                );
             }
-            return null;
+
+            var data = JsonConvert.DeserializeObject<InitiateChallengeResponse>(responseText);
+            Debug.Log("after deserialize");
+            return data;
+        }
+
+        private async Awaitable<CheckChallengeResponse> CheckChallenge(string challengeId, DateTime expiresAt, string baseUrl)
+        {
+            var url = $"{baseUrl}/{ApiCheckChallengeUrl(challengeId)}";
+
+            while (new DateTime() < expiresAt)
+            {
+                var body = new Dictionary<string, string>() {
+                    {"deviceId", GetDeviceId()}
+                };
+
+                var response = await HttpClient.PostAsync(
+                    url,
+                    new FormUrlEncodedContent(body)
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        $"Login failed: {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}"
+                    );
+                }
+
+                var data = JsonConvert.DeserializeObject<CheckChallengeResponse>(await response.Content.ReadAsStringAsync());
+                if (data.Status == "verified")
+                {
+                    return data;
+                }
+
+                if (data.Status == "not found")
+                {
+                    throw new Exception("Challenge not found");
+                }
+
+                if (data.Status == "expired")
+                {
+                    throw new Exception("Challenge expired");
+                }
+
+                await Task.Delay(CheckInterval);
+            }
+
+            throw new Exception("Challenge expired");
+        }
+
+        private static void OpenBrowser(string url)
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true,
+            };
+
+            Process.Start(startInfo);
         }
 
         // Called by the custom inspector when the user clicks Sync
@@ -34,7 +132,8 @@ namespace Skald.Code.Editor
             try
             {
                 // sync
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Debug.LogError($"Error during sync: {e.Message}");
                 //Logout if sync fails
@@ -46,9 +145,37 @@ namespace Skald.Code.Editor
         public Awaitable Logout()
         {
             Debug.Log("Logging out");
-			SyncWithScaldState.IsLoggedIn = false;
-            //TODO: Logout
+
+            // TODO:
+            // 1. Call revoke endpoint
+            // 2. Delete local tokens (none exist yet)
+
+            SyncWithScaldState.IsLoggedIn = false;
             return null;
+        }
+
+        private class InitiateChallengeResponse
+        {
+            [JsonProperty("challengeId")]
+            public string ChallengeId { get; set; }
+
+            [JsonProperty("verificationUrl")]
+            public string VerificationUrl { get; set; }
+
+            [JsonProperty("expiresAt")]
+            public string ExpiresAt { get; set; }
+        }
+
+        private class CheckChallengeResponse
+        {
+            [JsonProperty("status")]
+            public string Status { get; set; }
+
+            [JsonProperty("username")]
+            public string Username { get; set; }
+
+            [JsonProperty("token")]
+            public string Token { get; set; }
         }
     }
 }
