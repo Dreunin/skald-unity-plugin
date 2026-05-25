@@ -6,18 +6,31 @@ namespace Skald.Code.Editor
     internal static class SyncWithScaldState
     {
         private const string LoggedInKey = "Skald.SyncWithScald.LoggedIn";
+        private const string TokenKey = "Skald.SyncWithScald.Token";
         private const string LogoSearchQuery = "SkaldLogo t:Texture2D";
 
         public static bool IsLoggedIn // TODO: upgrade to OS keychain / credential manager storage
         {
             get => EditorPrefs.GetBool(LoggedInKey, false);
-            set => EditorPrefs.SetBool(LoggedInKey, value);
+            private set => EditorPrefs.SetBool(LoggedInKey, value);
         }
 
         public static string Token
         {
-            get => EditorPrefs.GetString(LoggedInKey, null);
-            set => EditorPrefs.SetString(LoggedInKey, value);
+            get => EditorPrefs.GetString(TokenKey, null);
+            private set => EditorPrefs.SetString(TokenKey, value);
+        }
+
+        public static void Login(string token)
+        {
+            IsLoggedIn = true;
+            Token = token;
+        }
+
+        public static void Logout()
+        {
+            IsLoggedIn = false;
+            Token = null;
         }
 
         public static Texture2D LoadLogoTexture()

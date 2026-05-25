@@ -30,14 +30,10 @@ namespace Skald.Code.Editor
         // Called by the custom inspector when the user clicks Login
         public async Awaitable Login()
         {
-            Debug.Log("1");
             var initiateChallengeResponse = await InitiateChallenge(testUrl);
-            Debug.Log("2");
             OpenBrowser(initiateChallengeResponse.VerificationUrl);
-            Debug.Log("3");
             var checkChallengeResponse = await CheckChallenge(initiateChallengeResponse.ChallengeId, DateTime.Parse(initiateChallengeResponse.ExpiresAt), testUrl);
-            Debug.Log("4");
-            SyncWithScaldState.Token = checkChallengeResponse.Token;
+            SyncWithScaldState.Login(checkChallengeResponse.Token);
         }
 
         private async Awaitable<InitiateChallengeResponse> InitiateChallenge(string baseUrl)
@@ -128,7 +124,6 @@ namespace Skald.Code.Editor
         public Awaitable Sync()
         {
             Debug.Log("Syncing");
-            // TODO: Put sync logic here
             try
             {
                 // sync
@@ -136,8 +131,6 @@ namespace Skald.Code.Editor
             catch (Exception e)
             {
                 Debug.LogError($"Error during sync: {e.Message}");
-                //Logout if sync fails
-                SyncWithScaldState.IsLoggedIn = false;
             }
             return null;
         }
@@ -146,11 +139,7 @@ namespace Skald.Code.Editor
         {
             Debug.Log("Logging out");
 
-            // TODO:
-            // 1. Call revoke endpoint
-            // 2. Delete local tokens (none exist yet)
-
-            SyncWithScaldState.IsLoggedIn = false;
+            SyncWithScaldState.Logout();
             return null;
         }
 
