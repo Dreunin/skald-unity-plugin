@@ -1,0 +1,83 @@
+.skald-root {
+    padding: 16px;
+    background-color: rgb(30, 30, 30);
+}
+
+.skald-card {
+    max-width: 480px;
+    width: 100%;
+    align-self: center;
+    flex-grow: 1;
+
+    padding: 18px;
+
+    background-color: rgb(40, 40, 40);
+
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+}
+
+.skald-logo {
+    height: 72px;
+    margin-bottom: 16px;
+    align-self: center;
+}
+
+.skald-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.skald-subtitle {
+    opacity: 0.65;
+    margin-bottom: 16px;
+}
+
+.skald-label {
+    -unity-font-style: bold;
+}
+
+.skald-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.skald-divider {
+    height: 1px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.skald-button {
+    height: 34px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.skald-projects {
+    margin-top: 8px;
+}
+
+.skald-popup {
+    margin-bottom: 8px;
+}
+
+.skald-selected-project {
+    opacity: 0.75;
+    margin-bottom: 8px;
+}
+
+.skald-status-ok {
+    color: rgb(90, 205, 115);
+    -unity-font-style: bold;
+}
+
+.skald-status-error {
+    color: rgb(225, 90, 90);
+    -unity-font-style: bold;
+}
