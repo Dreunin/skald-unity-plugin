@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Skald.Code.Editor
 {
-    internal static class SyncWithScaldState
+    internal static class SyncWithSkaldState
     {
-        private const string LoggedInKey = "Skald.SyncWithScald.LoggedIn";
-        private const string TokenKey = "Skald.SyncWithScald.Token";
+        private const string LoggedInKey = "Skald.SyncWithSkald.LoggedIn";
+        private const string TokenKey = "Skald.SyncWithSkald.Token";
         private const string LogoSearchQuery = "SkaldLogo t:Texture2D";
 
         public static bool IsLoggedIn // TODO: upgrade to OS keychain / credential manager storage

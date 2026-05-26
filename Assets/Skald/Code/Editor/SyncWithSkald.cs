@@ -11,7 +11,7 @@ using Skald.Import;
 
 namespace Skald.Code.Editor
 {
-    public class SyncWithScald
+    public class SyncWithSkald
     {
         private static readonly HttpClient HttpClient = new();
         private const string BaseUrl = "https://skald.dual-daggers.com";
@@ -25,11 +25,11 @@ namespace Skald.Code.Editor
 
         private const string clientId = "unity";
 
-        public SyncWithScald()
+        public SyncWithSkald()
         {
-            if (SyncWithScaldState.IsLoggedIn)
+            if (SyncWithSkaldState.IsLoggedIn)
             {
-                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SyncWithScaldState.Token);
+                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SyncWithSkaldState.Token);
             }
         }
 
@@ -44,7 +44,7 @@ namespace Skald.Code.Editor
             var initiateChallengeResponse = await InitiateChallenge(testUrl);
             OpenBrowser(initiateChallengeResponse.VerificationUrl);
             var checkChallengeResponse = await CheckChallenge(initiateChallengeResponse.ChallengeId, DateTime.Parse(initiateChallengeResponse.ExpiresAt), testUrl);
-            SyncWithScaldState.Login(checkChallengeResponse.Token);
+            SyncWithSkaldState.Login(checkChallengeResponse.Token);
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", checkChallengeResponse.Token);
         }
 
@@ -80,7 +80,7 @@ namespace Skald.Code.Editor
         {
             Debug.Log("Logging out");
 
-            SyncWithScaldState.Logout();
+            SyncWithSkaldState.Logout();
             return null;
         }
 

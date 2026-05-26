@@ -7,24 +7,24 @@ using System.Linq;
 
 namespace Skald.Code.Editor
 {
-    public class SyncWithScaldWindow : EditorWindow
+    public class SyncWithSkaldWindow : EditorWindow
     {
         private Texture2D logoTexture;
-        SyncWithScald syncWithScald;
+        SyncWithSkald syncWithSkald;
         private Project[] projects = Array.Empty<Project>();
         private int selectedProjectIndex = 0;
         private Project selectedProject;
 
-        [MenuItem("Tools/Skald/Sync With Scald")]
+        [MenuItem("Tools/Skald/Sync With Skald")]
         public static void Open()
         {
-            GetWindow<SyncWithScaldWindow>("Scald Project Window");
+            GetWindow<SyncWithSkaldWindow>("Skald Project Window");
         }
 
         private void OnEnable()
         {
-            logoTexture = SyncWithScaldState.LoadLogoTexture();
-            syncWithScald = new SyncWithScald();
+            logoTexture = SyncWithSkaldState.LoadLogoTexture();
+            syncWithSkald = new SyncWithSkald();
         }
 
         private void OnGUI()
@@ -39,19 +39,19 @@ namespace Skald.Code.Editor
             }
 
             EditorGUILayout.LabelField("Status", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Connected:", SyncWithScaldState.IsLoggedIn ? "Yes" : "No");
+            EditorGUILayout.LabelField("Connected:", SyncWithSkaldState.IsLoggedIn ? "Yes" : "No");
 
             GUILayout.Space(6);
 
-            EditorGUI.BeginDisabledGroup(SyncWithScaldState.IsLoggedIn);
-            if (GUILayout.Button("Connect to Scald"))
+            EditorGUI.BeginDisabledGroup(SyncWithSkaldState.IsLoggedIn);
+            if (GUILayout.Button("Connect to Skald"))
             {
                 HandleLogin();
             }
             EditorGUI.EndDisabledGroup();
 
-            EditorGUI.BeginDisabledGroup(!SyncWithScaldState.IsLoggedIn);
-            if (GUILayout.Button("Disconnect from Scald"))
+            EditorGUI.BeginDisabledGroup(!SyncWithSkaldState.IsLoggedIn);
+            if (GUILayout.Button("Disconnect from Skald"))
             {
                 HandleLogout();
             }
@@ -94,20 +94,20 @@ namespace Skald.Code.Editor
 
         private async Task HandleLogout()
         {
-            await syncWithScald.Logout();
+            await syncWithSkald.Logout();
             Repaint();
         }
 
         private async Task HandleSync()
         {
-            Project[] fetchedProjects = await syncWithScald.Sync();
+            Project[] fetchedProjects = await syncWithSkald.Sync();
             SetProjects(fetchedProjects);
             Repaint();
         }
 
         private async Task HandleLogin()
         {
-            await syncWithScald.Login();
+            await syncWithSkald.Login();
             Repaint();
         }
 
