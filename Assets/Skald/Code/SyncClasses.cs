@@ -7,7 +7,7 @@ using Skald.Language;
 
 namespace Skald.Import
 {
-    public class EngineImport
+    public record EngineImport
     {
         [JsonProperty("schemaVersion")]
         public int SchemaVersion { get; set; }
@@ -16,22 +16,22 @@ namespace Skald.Import
         public string ExportedAt { get; set; }
 
         [JsonProperty("project")]
-        public Project Project { get; set; }
+        public SkaldProject Project { get; set; }
 
         [JsonProperty("characters")]
-        public Character[] Characters { get; set; }
+        public SkaldCharacter[] Characters { get; set; }
 
         [JsonProperty("tags")]
-        public Tag[] Tags { get; set; }
+        public SkaldTag[] Tags { get; set; }
 
         [JsonProperty("variables")]
-        public Variable[] Variables { get; set; }
+        public SkaldVariable[] Variables { get; set; }
 
         [JsonProperty("conversations")]
-        public Conversation[] Conversations { get; set; }
+        public SkaldConversation[] Conversations { get; set; }
     }
 
-    public class Tag
+    public record SkaldTag
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -40,20 +40,20 @@ namespace Skald.Import
         public string Name { get; set; }
     }
 
-    public class Variable
+    public record SkaldVariable
     {
         [JsonProperty("name")]
         public string Name { get; set; }
 
         [JsonProperty("variableType")]
-        public VariableType VariableType { get; set; }
+        public SkaldVariableType VariableType { get; set; }
 
         [JsonProperty("defaultValue")]
         public string DefaultValue { get; set; }
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum VariableType
+    public enum SkaldVariableType
     {
         [EnumMember(Value = "string")]
         String,
@@ -68,7 +68,7 @@ namespace Skald.Import
         Boolean,
     }
 
-    public class Conversation
+    public record SkaldConversation
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -77,16 +77,16 @@ namespace Skald.Import
         public string Title { get; set; }
 
         [JsonProperty("data")]
-        public ConversationData Data { get; set; }
+        public SkaldConversationData Data { get; set; }
     }
 
-    public class ConversationData
+    public record SkaldConversationData
     {
         [JsonProperty("nodes")]
-        public ExportedNode[] Nodes { get; set; }
+        public SkaldExportedNode[] Nodes { get; set; }
     }
 
-    public class Character
+    public record SkaldCharacter
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -98,7 +98,7 @@ namespace Skald.Import
         public string Color { get; set; }
     }
 
-    public class Project
+    public record SkaldProject
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -110,14 +110,14 @@ namespace Skald.Import
         public string Description { get; set; }
     }
 
-    [JsonConverter(typeof(ExportedNodeConverter))]
-    public abstract class ExportedNode
+    [JsonConverter(typeof(SkaldExportedNodeConverter))]
+    public abstract record SkaldExportedNode
     {
         [JsonProperty("id")]
         public string Id { get; set; }
     }
 
-    public class ExportedDialogueNode : ExportedNode
+    public record SkaldExportedDialogueNode : SkaldExportedNode
     {
         [JsonProperty("characterId")]
         public string CharacterId { get; set; }
@@ -132,17 +132,17 @@ namespace Skald.Import
         public string NextNode { get; set; }
     }
 
-    public class ExportedStartNode : ExportedNode
+    public record SkaldExportedStartNode : SkaldExportedNode
     {
         [JsonProperty("nextNode")]
         public string NextNode { get; set; }
     }
 
-    public class ExportedEndNode : ExportedNode
+    public record SkaldExportedEndNode : SkaldExportedNode
     {
     }
 
-    public class ExportedAssignmentNode : ExportedNode
+    public record SkaldExportedAssignmentNode : SkaldExportedNode
     {
         [JsonProperty("expression")]
         public TypedAssignment Expression { get; set; }
@@ -151,16 +151,16 @@ namespace Skald.Import
         public string NextNode { get; set; }
     }
 
-    public class ExportedPlayerChoiceNode : ExportedNode
+    public record SkaldExportedPlayerChoiceNode : SkaldExportedNode
     {
         [JsonProperty("choices")]
-        public ExportedPlayerChoice[] Choices { get; set; }
+        public SkaldExportedPlayerChoice[] Choices { get; set; }
 
         [JsonProperty("tags")]
         public string[] Tags { get; set; }
     }
 
-    public class ExportedPlayerChoice
+    public record SkaldExportedPlayerChoice
     {
         [JsonProperty("precondition")]
         public TypedExpression Precondition { get; set; }
@@ -172,11 +172,11 @@ namespace Skald.Import
         public string NextNode { get; set; }
     }
 
-    public class ExportedNodeConverter : JsonConverter
+    public class SkaldExportedNodeConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
-            return typeof(ExportedNode).IsAssignableFrom(objectType);
+            return typeof(SkaldExportedNode).IsAssignableFrom(objectType);
         }
 
         public override object ReadJson(
@@ -187,13 +187,13 @@ namespace Skald.Import
         {
             var jo = JObject.Load(reader);
             var type = jo["type"]?.Value<string>();
-            ExportedNode target = type switch
+            SkaldExportedNode target = type switch
             {
-                "dialogue" => new ExportedDialogueNode(),
-                "start" => new ExportedStartNode(),
-                "end" => new ExportedEndNode(),
-                "assignment" => new ExportedAssignmentNode(),
-                "playerChoice" => new ExportedPlayerChoiceNode(),
+                "dialogue" => new SkaldExportedDialogueNode(),
+                "start" => new SkaldExportedStartNode(),
+                "end" => new SkaldExportedEndNode(),
+                "assignment" => new SkaldExportedAssignmentNode(),
+                "playerChoice" => new SkaldExportedPlayerChoiceNode(),
                 _ => throw new JsonSerializationException(
                                         $"Unknown exported node type: {type}"),
             };

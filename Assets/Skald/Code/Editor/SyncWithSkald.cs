@@ -49,7 +49,7 @@ namespace Skald.Code.Editor
         }
 
         // Called by the custom inspector when the user clicks Sync
-        public async Task<Project[]> GetProjects()
+        public async Task<SkaldProject[]> GetProjects()
         {
             var response = await HttpClient.GetAsync($"{BaseUrl}/{ApiProjectListUrl}");
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -59,9 +59,9 @@ namespace Skald.Code.Editor
                 throw new Exception($"Failed to get projects: {responseBody}");
             }
 
-            var projects = JsonConvert.DeserializeObject<Project[]>(responseBody);
+            var projects = JsonConvert.DeserializeObject<SkaldProject[]>(responseBody);
 
-            return projects ?? Array.Empty<Project>();
+            return projects ?? Array.Empty<SkaldProject>();
         }
 
         public async Task<bool> LoadProject(string projectId)

@@ -76,7 +76,7 @@ namespace Skald.Language
         Negate
     }
 
-    public abstract class RawNodeBase
+    public abstract record RawNodeBase
     {
         [JsonProperty("from")]
         public int From { get; set; }
@@ -85,24 +85,24 @@ namespace Skald.Language
         public int To { get; set; }
     }
 
-    public class RichTextProgram : RawNodeBase
+    public record RichTextProgram : RawNodeBase
     {
         [JsonProperty("content")]
         public RichTextSegment[] Content { get; set; }
     }
 
     [JsonConverter(typeof(RichTextSegmentConverter))]
-    public abstract class RichTextSegment : RawNodeBase
+    public abstract record RichTextSegment : RawNodeBase
     {
     }
 
-    public class RichTextContent : RichTextSegment
+    public record RichTextContent : RichTextSegment
     {
         [JsonProperty("content")]
         public string Content { get; set; }
     }
 
-    public class Tag : RichTextSegment
+    public record Tag : RichTextSegment
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -123,13 +123,13 @@ namespace Skald.Language
         public int CloseTagFrom { get; set; }
     }
 
-    public class Template : RichTextSegment, ITagValue
+    public record Template : RichTextSegment, ITagValue
     {
         [JsonProperty("content")]
         public TypedExpression Content { get; set; }
     }
 
-    public class TagAttribute : RawNodeBase
+    public record TagAttribute : RawNodeBase
     {
         [JsonProperty("key")]
         public string Key { get; set; }
@@ -143,32 +143,32 @@ namespace Skald.Language
     {
     }
 
-    public class TagIdentifier : RawNodeBase, ITagValue
+    public record TagIdentifier : RawNodeBase, ITagValue
     {
         [JsonProperty("content")]
         public string Content { get; set; }
     }
 
-    public class TagColorHex : RawNodeBase, ITagValue
+    public record TagColorHex : RawNodeBase, ITagValue
     {
         [JsonProperty("content")]
         public string Content { get; set; }
     }
 
-    public class TagString : RawNodeBase, ITagValue
+    public record TagString : RawNodeBase, ITagValue
     {
         [JsonProperty("content")]
         public string Content { get; set; }
     }
 
     [JsonConverter(typeof(TypedExpressionConverter))]
-    public abstract class TypedExpression : RawNodeBase
+    public abstract record TypedExpression : RawNodeBase
     {
         [JsonProperty("resultType")]
         public TypeName ResultType { get; set; }
     }
 
-    public class TypedBinaryExpression : TypedExpression
+    public record TypedBinaryExpression : TypedExpression
     {
         [JsonProperty("left")]
         public TypedExpression Left { get; set; }
@@ -180,7 +180,7 @@ namespace Skald.Language
         public TypedExpression Right { get; set; }
     }
 
-    public class TypedUnaryExpression : TypedExpression
+    public record TypedUnaryExpression : TypedExpression
     {
         [JsonProperty("op")]
         public UnaryOperator Op { get; set; }
@@ -189,7 +189,7 @@ namespace Skald.Language
         public TypedExpression Expr { get; set; }
     }
 
-    public class TypedAssignment : RawNodeBase
+    public record TypedAssignment : RawNodeBase
     {
         [JsonProperty("variable")]
         public TypedIdentifier Variable { get; set; }
@@ -201,37 +201,37 @@ namespace Skald.Language
         public TypeName ResultType { get; set; }
     }
 
-    public class TypedInteger : TypedExpression
+    public record TypedInteger : TypedExpression
     {
         [JsonProperty("content")]
         public int Content { get; set; }
     }
 
-    public class TypedFloat : TypedExpression
+    public record TypedFloat : TypedExpression
     {
         [JsonProperty("content")]
         public double Content { get; set; }
     }
 
-    public class TypedStringLiteral : TypedExpression
+    public record TypedStringLiteral : TypedExpression
     {
         [JsonProperty("content")]
         public string Content { get; set; }
     }
 
-    public class TypedIdentifier : TypedExpression
+    public record TypedIdentifier : TypedExpression
     {
         [JsonProperty("content")]
         public string Content { get; set; }
     }
 
-    public class TypedBooleanLiteral : TypedExpression
+    public record TypedBooleanLiteral : TypedExpression
     {
         [JsonProperty("content")]
         public bool Content { get; set; }
     }
 
-    public class TypedParenthesizedExpression : TypedExpression
+    public record TypedParenthesizedExpression : TypedExpression
     {
         [JsonProperty("content")]
         public TypedExpression Content { get; set; }

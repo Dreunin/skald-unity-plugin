@@ -11,9 +11,9 @@ namespace Skald.Code.Editor
     {
         private Texture2D logoTexture;
         SyncWithSkald syncWithSkald;
-        private Project[] projects = Array.Empty<Project>();
+        private SkaldProject[] projects = Array.Empty<SkaldProject>();
         private int selectedProjectIndex = 0;
-        private Project selectedProject;
+        private SkaldProject selectedProject;
 
         [MenuItem("Tools/Skald/Sync With Skald")]
         public static void Open()
@@ -133,7 +133,7 @@ namespace Skald.Code.Editor
         {
             try
             {
-                Project[] fetchedProjects = await syncWithSkald.GetProjects();
+                SkaldProject[] fetchedProjects = await syncWithSkald.GetProjects();
                 SetProjects(fetchedProjects);
                 Repaint();
             }
@@ -156,9 +156,9 @@ namespace Skald.Code.Editor
             }
         }
 
-        private void SetProjects(Project[] fetchedProjects)
+        private void SetProjects(SkaldProject[] fetchedProjects)
         {
-            projects = fetchedProjects ?? Array.Empty<Project>();
+            projects = fetchedProjects ?? Array.Empty<SkaldProject>();
             selectedProjectIndex = 0;
 
             selectedProject = projects.Length > 0 ? projects[0] : null;
