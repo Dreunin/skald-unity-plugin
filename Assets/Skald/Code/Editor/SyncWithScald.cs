@@ -2,18 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Skald.Import;
 
 namespace Skald.Code.Editor
 {
     public class SyncWithScald
     {
         private static readonly HttpClient HttpClient = new();
-        private const string ApiBaseUrl = "https://skald.dual-daggers.com";
+        private const string BaseUrl = "https://skald.dual-daggers.com";
         private const string ApiInitiateChallengeUrl = "api/engine-challenge/initiate";
+        private const string ApiProjectListUrl = "api/engine-export/projects";
         private static string ApiCheckChallengeUrl(string challengeId) => $"api/engine-challenge/{challengeId}/check";
 
         private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(3);
@@ -21,6 +24,14 @@ namespace Skald.Code.Editor
         private const string testUrl = "http://localhost:9999";
 
         private const string clientId = "unity";
+
+        public SyncWithScald()
+        {
+            if (SyncWithScaldState.IsLoggedIn)
+            {
+                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SyncWithScaldState.Token);
+            }
+        }
 
         private static string GetDeviceId()
         {
@@ -34,6 +45,43 @@ namespace Skald.Code.Editor
             OpenBrowser(initiateChallengeResponse.VerificationUrl);
             var checkChallengeResponse = await CheckChallenge(initiateChallengeResponse.ChallengeId, DateTime.Parse(initiateChallengeResponse.ExpiresAt), testUrl);
             SyncWithScaldState.Login(checkChallengeResponse.Token);
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", checkChallengeResponse.Token);
+        }
+
+        // Called by the custom inspector when the user clicks Sync
+        public async Awaitable<Project[]> Sync()
+        {
+            Debug.Log("Syncing");
+            try
+            {
+                var response = await HttpClient.GetAsync($"{testUrl}/{ApiProjectListUrl}");
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Debug.Log($"Sending request to {testUrl}/{ApiProjectListUrl}");
+                Debug.Log($"Sync response: {responseBody}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to sync: {responseBody}");
+                }
+
+                var projects = JsonConvert.DeserializeObject<Project[]>(responseBody);
+
+                return projects ?? Array.Empty<Project>();
+
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error during sync: {e.Message}");
+                return Array.Empty<Project>();
+            }
+        }
+
+        public Awaitable Logout()
+        {
+            Debug.Log("Logging out");
+
+            SyncWithScaldState.Logout();
+            return null;
         }
 
         private async Awaitable<InitiateChallengeResponse> InitiateChallenge(string baseUrl)
@@ -118,29 +166,6 @@ namespace Skald.Code.Editor
             };
 
             Process.Start(startInfo);
-        }
-
-        // Called by the custom inspector when the user clicks Sync
-        public Awaitable Sync()
-        {
-            Debug.Log("Syncing");
-            try
-            {
-                // sync
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error during sync: {e.Message}");
-            }
-            return null;
-        }
-
-        public Awaitable Logout()
-        {
-            Debug.Log("Logging out");
-
-            SyncWithScaldState.Logout();
-            return null;
         }
 
         private class InitiateChallengeResponse
