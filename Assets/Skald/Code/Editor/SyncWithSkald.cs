@@ -49,9 +49,8 @@ namespace Skald.Code.Editor
         }
 
         // Called by the custom inspector when the user clicks Sync
-        public async Awaitable<Project[]> Sync()
+        public async Awaitable<Project[]> GetProjects()
         {
-            Debug.Log("Syncing");
             try
             {
                 var response = await HttpClient.GetAsync($"{testUrl}/{ApiProjectListUrl}");
@@ -61,7 +60,7 @@ namespace Skald.Code.Editor
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception($"Failed to sync: {responseBody}");
+                    throw new Exception($"Failed to get projects: {responseBody}");
                 }
 
                 var projects = JsonConvert.DeserializeObject<Project[]>(responseBody);
@@ -71,7 +70,7 @@ namespace Skald.Code.Editor
             }
             catch (Exception e)
             {
-                Debug.LogError($"Error during sync: {e.Message}");
+                Debug.LogError($"Error during GetProjects: {e.Message}");
                 return Array.Empty<Project>();
             }
         }

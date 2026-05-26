@@ -56,9 +56,9 @@ namespace Skald.Code.Editor
                 HandleLogout();
             }
 
-            if (GUILayout.Button("Sync"))
+            if (GUILayout.Button("Get Projects"))
             {
-                HandleSync();
+                HandleGetProjects();
             }
 
             EditorGUILayout.LabelField("Project", EditorStyles.boldLabel);
@@ -98,9 +98,9 @@ namespace Skald.Code.Editor
             Repaint();
         }
 
-        private async Task HandleSync()
+        private async Task HandleGetProjects()
         {
-            Project[] fetchedProjects = await syncWithSkald.Sync();
+            Project[] fetchedProjects = await syncWithSkald.GetProjects();
             SetProjects(fetchedProjects);
             Repaint();
         }
