@@ -46,19 +46,19 @@ namespace Skald.Code.Editor
             EditorGUI.BeginDisabledGroup(SyncWithSkaldState.IsLoggedIn);
             if (GUILayout.Button("Connect to Skald"))
             {
-                HandleLogin();
+                _ = HandleLogin();
             }
             EditorGUI.EndDisabledGroup();
 
             EditorGUI.BeginDisabledGroup(!SyncWithSkaldState.IsLoggedIn);
             if (GUILayout.Button("Disconnect from Skald"))
             {
-                HandleLogout();
+                _ = HandleLogout();
             }
 
             if (GUILayout.Button("Get Projects"))
             {
-                HandleGetProjects();
+                _ = HandleGetProjects();
             }
 
             EditorGUILayout.LabelField("Project", EditorStyles.boldLabel);
@@ -87,7 +87,7 @@ namespace Skald.Code.Editor
 
                 if (GUILayout.Button("Import Selected Project"))
                 {
-                    HandleImportSelectedProject();
+                    _ = HandleImportSelectedProject();
                 }
             }
             else
@@ -100,32 +100,60 @@ namespace Skald.Code.Editor
 
         private async Task HandleImportSelectedProject()
         {
-            var project = await syncWithSkald.LoadProject(selectedProject.Id);
-            Repaint();
-            if (project != null)
+            try
             {
-                EditorUtility.DisplayDialog("Success", $"Project {project.Project.Title} imported successfully.", "OK");
+                var success = await syncWithSkald.LoadProject(selectedProject.Id);
+                UnityEditor.AssetDatabase.Refresh();
+                if (success)
+                {
+                    EditorUtility.DisplayDialog("Success", $"Project {selectedProject.Title} imported successfully.", "OK");
+                }
+                Repaint();
             }
-            syncWithSkald.CreateOrUpdateProject(project);
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("Error", $"Failed to import project: {e.Message}", "OK");
+            }
         }
 
         private async Task HandleLogout()
         {
-            await syncWithSkald.Logout();
-            Repaint();
+            try
+            {
+                await syncWithSkald.Logout();
+                Repaint();
+            }
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("Error", $"Failed to logout: {e.Message}", "OK");
+            }
         }
 
         private async Task HandleGetProjects()
         {
-            Project[] fetchedProjects = await syncWithSkald.GetProjects();
-            SetProjects(fetchedProjects);
-            Repaint();
+            try
+            {
+                Project[] fetchedProjects = await syncWithSkald.GetProjects();
+                SetProjects(fetchedProjects);
+                Repaint();
+            }
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("Error", $"Failed to get projects: {e.Message}", "OK");
+            }
         }
 
         private async Task HandleLogin()
         {
-            await syncWithSkald.Login();
-            Repaint();
+            try
+            {
+                await syncWithSkald.Login();
+                Repaint();
+            }
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("Error", $"Failed to login: {e.Message}", "OK");
+            }
         }
 
         private void SetProjects(Project[] fetchedProjects)

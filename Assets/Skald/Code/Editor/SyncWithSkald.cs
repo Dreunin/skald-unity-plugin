@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace Skald.Code.Editor
         private static string ApiExportProjectUrl(string projectId) => $"api/engine-export/projects/{projectId}";
 
         private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(3);
+
+        private const string DirectoryPath = "Assets/Resources/Skald";
 
         private const string testUrl = "http://localhost:9999";
 
@@ -52,61 +55,44 @@ namespace Skald.Code.Editor
         // Called by the custom inspector when the user clicks Sync
         public async Awaitable<Project[]> GetProjects()
         {
-            try
+            Debug.Log($"Sending request to {testUrl}/{ApiProjectListUrl}");
+            var response = await HttpClient.GetAsync($"{testUrl}/{ApiProjectListUrl}");
+            var responseBody = await response.Content.ReadAsStringAsync();
+            Debug.Log($"Sync response: {responseBody}");
+
+            if (!response.IsSuccessStatusCode)
             {
-                Debug.Log($"Sending request to {testUrl}/{ApiProjectListUrl}");
-                var response = await HttpClient.GetAsync($"{testUrl}/{ApiProjectListUrl}");
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Debug.Log($"Sync response: {responseBody}");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Failed to get projects: {responseBody}");
-                }
-
-                var projects = JsonConvert.DeserializeObject<Project[]>(responseBody);
-
-                return projects ?? Array.Empty<Project>();
+                throw new Exception($"Failed to get projects: {responseBody}");
             }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error during GetProjects: {e.Message}");
-                return Array.Empty<Project>();
-            }
+
+            var projects = JsonConvert.DeserializeObject<Project[]>(responseBody);
+
+            return projects ?? Array.Empty<Project>();
         }
 
-        public async Awaitable<EngineImport> LoadProject(string projectId)
+        public async Awaitable<bool> LoadProject(string projectId)
         {
-            try
+            Debug.Log($"Sending request to {testUrl}/{ApiExportProjectUrl(projectId)}");
+            var response = await HttpClient.GetAsync($"{testUrl}/{ApiExportProjectUrl(projectId)}");
+
+            if (!response.IsSuccessStatusCode)
             {
-                Debug.Log($"Sending request to {testUrl}/{ApiExportProjectUrl(projectId)}");
-                var response = await HttpClient.GetAsync($"{testUrl}/{ApiExportProjectUrl(projectId)}");
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Debug.Log($"Sync response: {responseBody}");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Failed to load project: {responseBody}");
-                }
-
-                var project = JsonConvert.DeserializeObject<EngineImport>(responseBody, new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore
-                });
-                Debug.Log($"Project data: \n{project}");
-
-                return project;
+                var errorBody = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to load project: {errorBody}");
             }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error during LoadProject: {e.Message}");
-                return null;
-            }
-        }
 
-        public async Awaitable CreateOrUpdateProject(EngineImport project)
-        {
-            Debug.Log($"Creating or updating project: {project.Project.Title}");
+            Directory.CreateDirectory(DirectoryPath);
+
+            await using var httpStream = await response.Content.ReadAsStreamAsync();
+            await using var fileStream = new FileStream(
+                Path.Combine(DirectoryPath, $"{projectId}.json"),
+                FileMode.Create,
+                FileAccess.Write
+            );
+
+            await httpStream.CopyToAsync(fileStream);
+
+            return true;
         }
 
         public Awaitable Logout()
