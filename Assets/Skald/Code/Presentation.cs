@@ -1,14 +1,31 @@
 using System;
 using System.Collections.Generic;
+using Skald;
+using Skald.Import;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Presentation : MonoBehaviour
+public class Presentation : MonoBehaviour, IDialoguePresenter
 {
+    public void ShowDialogue(SkaldCharacter character, string dialogue) { }
+    public void ShowOptions(Option[] options) { }
+
+    private Skald.Skald skald;
+
+
+    [ContextMenu("Load Project")]
+    public void TestLoad()
+    {
+        skald = new Skald.Skald(this);
+        skald.LoadProject("Assets/Resources/Skald/jfb8zhi1ib95iabsaxb6q0aj.json");
+        Debug.Log(skald.Project.Project.Title);
+    }
+
+
     [SerializeField] private UIDocument uiDocument;
 
     private string defaultSpeaker = "Character Name";
-    private string[] defaultDialogue = new string[] {"This is where you dialogue would be...", "if you had any!", "Assign dialogue to have it show up here."};
+    private string[] defaultDialogue = new string[] { "This is where you dialogue would be...", "if you had any!", "Assign dialogue to have it show up here." };
 
     private VisualElement root;
     private Label speakerNameLabel;
@@ -29,12 +46,12 @@ public class Presentation : MonoBehaviour
     private void BuildUI()
     {
         var conversationUxml = uiDocument.visualTreeAsset;
-        if( conversationUxml == null)
+        if (conversationUxml == null)
         {
             Debug.LogError("No UXML found in UIDocument.");
             return;
         }
-        
+
         root = uiDocument.rootVisualElement;
 
         if (conversationUxml != null)
