@@ -117,4 +117,10 @@ public class Presentation : MonoBehaviour, IDialoguePresenter
     {
         ContinuePressed?.Invoke();
     }
+
+    public void EndConversation()
+    {
+        throw new NotImplementedException();
+    }
+
 }

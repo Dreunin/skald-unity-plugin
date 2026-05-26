@@ -110,6 +110,11 @@ namespace Skald.Import
         public string Description { get; set; }
     }
 
+    public interface ISkaldContinuable
+    {
+        string NextNode { get; }
+    }
+
     [JsonConverter(typeof(SkaldExportedNodeConverter))]
     public abstract record SkaldExportedNode
     {
@@ -117,7 +122,7 @@ namespace Skald.Import
         public string Id { get; set; }
     }
 
-    public record SkaldExportedDialogueNode : SkaldExportedNode
+    public record SkaldExportedDialogueNode : SkaldExportedNode, ISkaldContinuable
     {
         [JsonProperty("characterId")]
         public string CharacterId { get; set; }
@@ -132,7 +137,7 @@ namespace Skald.Import
         public string NextNode { get; set; }
     }
 
-    public record SkaldExportedStartNode : SkaldExportedNode
+    public record SkaldExportedStartNode : SkaldExportedNode, ISkaldContinuable
     {
         [JsonProperty("nextNode")]
         public string NextNode { get; set; }
@@ -142,7 +147,7 @@ namespace Skald.Import
     {
     }
 
-    public record SkaldExportedAssignmentNode : SkaldExportedNode
+    public record SkaldExportedAssignmentNode : SkaldExportedNode, ISkaldContinuable
     {
         [JsonProperty("expression")]
         public TypedAssignment Expression { get; set; }
@@ -160,7 +165,7 @@ namespace Skald.Import
         public string[] Tags { get; set; }
     }
 
-    public record SkaldExportedPlayerChoice
+    public record SkaldExportedPlayerChoice : ISkaldContinuable
     {
         [JsonProperty("precondition")]
         public TypedExpression Precondition { get; set; }

@@ -210,7 +210,7 @@ namespace Skald.Language
     public record TypedFloat : TypedExpression
     {
         [JsonProperty("content")]
-        public double Content { get; set; }
+        public float Content { get; set; }
     }
 
     public record TypedStringLiteral : TypedExpression
