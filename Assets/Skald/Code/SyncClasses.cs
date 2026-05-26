@@ -47,6 +47,9 @@ namespace Skald.Import
 
         [JsonProperty("variableType")]
         public VariableType VariableType { get; set; }
+
+        [JsonProperty("defaultValue")]
+        public string DefaultValue { get; set; }
     }
 
     [JsonConverter(typeof(StringEnumConverter))]

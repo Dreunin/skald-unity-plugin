@@ -83,6 +83,12 @@ namespace Skald.Code.Editor
 
                 EditorGUILayout.LabelField("Selected:", selectedProjectName);
                 selectedProject = projects[selectedProjectIndex];
+
+
+                if (GUILayout.Button("Import Selected Project"))
+                {
+                    HandleImportSelectedProject();
+                }
             }
             else
             {
@@ -90,6 +96,17 @@ namespace Skald.Code.Editor
             }
 
             EditorGUI.EndDisabledGroup();
+        }
+
+        private async Task HandleImportSelectedProject()
+        {
+            var project = await syncWithSkald.LoadProject(selectedProject.Id);
+            Repaint();
+            if (project != null)
+            {
+                EditorUtility.DisplayDialog("Success", $"Project {project.Project.Title} imported successfully.", "OK");
+            }
+            syncWithSkald.CreateOrUpdateProject(project);
         }
 
         private async Task HandleLogout()

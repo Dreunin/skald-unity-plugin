@@ -18,6 +18,7 @@ namespace Skald.Code.Editor
         private const string ApiInitiateChallengeUrl = "api/engine-challenge/initiate";
         private const string ApiProjectListUrl = "api/engine-export/projects";
         private static string ApiCheckChallengeUrl(string challengeId) => $"api/engine-challenge/{challengeId}/check";
+        private static string ApiExportProjectUrl(string projectId) => $"api/engine-export/projects/{projectId}";
 
         private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(3);
 
@@ -53,9 +54,9 @@ namespace Skald.Code.Editor
         {
             try
             {
+                Debug.Log($"Sending request to {testUrl}/{ApiProjectListUrl}");
                 var response = await HttpClient.GetAsync($"{testUrl}/{ApiProjectListUrl}");
                 var responseBody = await response.Content.ReadAsStringAsync();
-                Debug.Log($"Sending request to {testUrl}/{ApiProjectListUrl}");
                 Debug.Log($"Sync response: {responseBody}");
 
                 if (!response.IsSuccessStatusCode)
@@ -66,13 +67,46 @@ namespace Skald.Code.Editor
                 var projects = JsonConvert.DeserializeObject<Project[]>(responseBody);
 
                 return projects ?? Array.Empty<Project>();
-
             }
             catch (Exception e)
             {
                 Debug.LogError($"Error during GetProjects: {e.Message}");
                 return Array.Empty<Project>();
             }
+        }
+
+        public async Awaitable<EngineImport> LoadProject(string projectId)
+        {
+            try
+            {
+                Debug.Log($"Sending request to {testUrl}/{ApiExportProjectUrl(projectId)}");
+                var response = await HttpClient.GetAsync($"{testUrl}/{ApiExportProjectUrl(projectId)}");
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Debug.Log($"Sync response: {responseBody}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to load project: {responseBody}");
+                }
+
+                var project = JsonConvert.DeserializeObject<EngineImport>(responseBody, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+                Debug.Log($"Project data: \n{project}");
+
+                return project;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error during LoadProject: {e.Message}");
+                return null;
+            }
+        }
+
+        public async Awaitable CreateOrUpdateProject(EngineImport project)
+        {
+            Debug.Log($"Creating or updating project: {project.Project.Title}");
         }
 
         public Awaitable Logout()
@@ -189,6 +223,12 @@ namespace Skald.Code.Editor
 
             [JsonProperty("token")]
             public string Token { get; set; }
+        }
+
+        private class ProjectResponse
+        {
+
+
         }
     }
 }

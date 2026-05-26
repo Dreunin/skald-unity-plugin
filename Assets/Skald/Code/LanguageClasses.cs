@@ -88,7 +88,7 @@ namespace Skald.Language
     public class RichTextProgram : RawNodeBase
     {
         [JsonProperty("content")]
-        public List<RichTextSegment> Content { get; set; }
+        public RichTextSegment[] Content { get; set; }
     }
 
     [JsonConverter(typeof(RichTextSegmentConverter))]
@@ -111,10 +111,10 @@ namespace Skald.Language
         public ITagValue Value { get; set; }
 
         [JsonProperty("attributes")]
-        public List<TagAttribute> Attributes { get; set; }
+        public TagAttribute[] Attributes { get; set; }
 
         [JsonProperty("content")]
-        public List<RichTextSegment> Content { get; set; }
+        public RichTextSegment[] Content { get; set; }
 
         [JsonProperty("openTagTo")]
         public int OpenTagTo { get; set; }
