@@ -230,7 +230,7 @@ namespace Skald
             };
         }
 
-        private string ToDisplayString()
+        public string ToDisplayString()
         {
             return Type switch
             {

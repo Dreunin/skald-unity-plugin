@@ -9,7 +9,61 @@ namespace Skald
 
         public static string InterpretRichText(RichTextProgram text, Dictionary<string, Skald.Variable> variables)
         {
-            return null;
+            var output = "";
+            foreach (var segment in text.Content)
+            {
+                output += InterpretRichTextSegment(segment, variables);
+            }
+            return output;
+        }
+
+        private static string InterpretRichTextSegment(RichTextSegment segment, Dictionary<string, Skald.Variable> variables)
+        {
+            return segment switch
+            {
+                RichTextContent content => content.Content,
+                Tag tag => InterpretTag(tag, variables),
+                Template template => InterpretTemplate(template, variables),
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private static string InterpretTag(Tag tag, Dictionary<string, Skald.Variable> variables)
+        {
+            var content = "";
+            foreach (var segment in tag.Content)
+            {
+                content += InterpretRichTextSegment(segment, variables);
+            }
+
+            return tag.Name switch
+            {
+                "b" => $"<b>{content}</b>",
+                "i" => $"<i>{content}</i>",
+                "u" => $"<u>{content}</u>",
+                "s" => $"<s>{content}</s>",
+                "color" => $"<color={InterpretTagValue(tag, variables)}>{content}</color>",
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        private static string InterpretTagValue(Tag tag, Dictionary<string, Skald.Variable> variables)
+        {
+            // TODO: Support tag values as templates
+            return tag.Value switch
+            {
+                Template template => throw new NotImplementedException(),
+                TagIdentifier tagIdentifier => $"\"{variables[tagIdentifier.Content].ToDisplayString()}\"",
+                TagColorHex tagColorHex => tagColorHex.Content,
+                TagString tagString => $"\"{tagString.Content}\"",
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        private static string InterpretTemplate(Template template, Dictionary<string, Skald.Variable> variables)
+        {
+            var expressionResult = InterpretExpression(template.Content, variables);
+            return expressionResult.ToDisplayString();
         }
 
         public static ExpressionResult InterpretExpression(TypedExpression expression, Dictionary<string, Skald.Variable> variables)

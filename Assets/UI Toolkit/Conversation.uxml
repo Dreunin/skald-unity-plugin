@@ -4,12 +4,12 @@
         <ui:VisualElement name="speaker-badge" style="position: absolute; top: -14px; left: 12px; padding: 4px 10px; background-color: rgb(44, 44, 44); border-radius: 8px;">
             <ui:Label name="speaker-name" text="Narrator" style="color: rgb(255, 255, 255); font-size: 14px; -unity-font-style: bold;"/>
         </ui:VisualElement>
-        <ui:Label name="dialogue-text" text="And so it was that no other person could match their strength." style="color: rgb(255, 255, 255); font-size: 16px; -unity-font-style: normal; white-space: normal; height: 50%;"/>
+        <ui:Label name="dialogue-text" text="Once upon a time, &lt;color=red&gt;Little Red Riding Hood&lt;/color&gt; was traveling to her grandmother&apos;s house with bread and wine since the poor woman had fallen sick." style="color: rgb(255, 255, 255); font-size: 32px; -unity-font-style: normal; white-space: normal; height: 50%;"/>
         <ui:ScrollView name="choices-scroll" vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" style="max-height: 120px; flex-shrink: 0; width: 100%; height: 50%; justify-content: space-around; align-items: stretch;">
             <ui:VisualElement name="choices-container" style="flex-direction: column; row-gap: 8px; align-items: stretch; width: 100%;">
-                <ui:Button name="choice-1" text="I&apos;m doing great!" class="choice" style="height: 30px; width: 100%;"/>
-                <ui:Button name="choice-2" text="I can get even stronger!" class="choice" style="height: 30px; width: 100%;"/>
-                <ui:Button name="choice-3" text="I wonder what&apos;s for dinner..." class="choice" style="height: 30px; width: 100%;"/>
+                <ui:Button name="choice-1" text="These are player choices" class="choice" style="height: 30px; width: 100%;"/>
+                <ui:Button name="choice-2" text="This is the second choice" class="choice" style="height: 30px; width: 100%;"/>
+                <ui:Button name="choice-3" text="This is the last choice" class="choice" style="height: 30px; width: 100%;"/>
             </ui:VisualElement>
         </ui:ScrollView>
         <ui:Button name="continue-button" text="&gt;" style="align-self: flex-end; width: 36px; height: 36px; background-color: rgb(228, 87, 60); color: rgb(255, 255, 255); border-radius: 8px; display: none;"/>

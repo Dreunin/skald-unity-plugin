@@ -286,6 +286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e951f68ccd40794894a788bf1318556, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Presentation
+  uiDocument: {fileID: 377522508}
 --- !u!114 &377522508
 MonoBehaviour:
   m_ObjectHideFlags: 0

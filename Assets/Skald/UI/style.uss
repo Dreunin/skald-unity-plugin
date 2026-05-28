@@ -10,4 +10,5 @@
     border-bottom-left-radius: 4px;
     flex-grow: 1;
     flex-shrink: 0;
+    font-size: 30px;
 }

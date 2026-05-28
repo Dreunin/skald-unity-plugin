@@ -32,7 +32,7 @@ namespace Skald
     {
         private readonly IDialoguePresenter _dialoguePresenter;
         public EngineImport Project { get; private set; }
-        public Dictionary<string, Variable> Variables { get; private set; } = new ();
+        public Dictionary<string, Variable> Variables { get; private set; } = new();
 
         public Skald(IDialoguePresenter dialoguePresenter)
         {
@@ -45,9 +45,11 @@ namespace Skald
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
+            ResetVariables();
         }
 
-        public void ResetVariables() {
+        public void ResetVariables()
+        {
             Variables.Clear();
             foreach (var variable in Project.Variables)
             {
@@ -88,6 +90,9 @@ namespace Skald
                     var character = dialogueNode.CharacterId != null ? Project.Characters.First(c => c.Id == dialogueNode.CharacterId) : null;
                     _dialoguePresenter.ShowDialogue(character, Interpreter.InterpretRichText(dialogueNode.Text, Variables));
                     break;
+                case SkaldExportedStartNode:
+                    conversation.Continue();
+                    break;
                 case SkaldExportedEndNode:
                     _dialoguePresenter.EndConversation();
                     break;
@@ -121,6 +126,7 @@ namespace Skald
                 _skaldConversation = skaldConversation;
                 _currentNode = startingNode;
                 _executeNode = executeNode;
+                _executeNode(_currentNode, this); // Execute the startnode
             }
 
             public bool CanContinue()
@@ -144,7 +150,8 @@ namespace Skald
             }
         }
 
-        public class Variable {
+        public class Variable
+        {
             public TypeName Type { get; }
 
             private string stringValue;
@@ -238,6 +245,18 @@ namespace Skald
             {
                 Type = TypeName.Float;
                 this.floatValue = floatValue;
+            }
+
+            public string ToDisplayString()
+            {
+                return Type switch
+                {
+                    TypeName.String => stringValue,
+                    TypeName.Boolean => booleanValue.ToString(),
+                    TypeName.Integer => integerValue.ToString(),
+                    TypeName.Float => floatValue.ToString(),
+                    _ => throw new Exception("Unknown type."),
+                };
             }
         }
     }
