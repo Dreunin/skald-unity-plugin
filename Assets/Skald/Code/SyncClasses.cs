@@ -46,26 +46,10 @@ namespace Skald.Import
         public string Name { get; set; }
 
         [JsonProperty("variableType")]
-        public SkaldVariableType VariableType { get; set; }
+        public TypeName VariableType { get; set; }
 
         [JsonProperty("defaultValue")]
         public string DefaultValue { get; set; }
-    }
-
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum SkaldVariableType
-    {
-        [EnumMember(Value = "string")]
-        String,
-
-        [EnumMember(Value = "integer")]
-        Integer,
-
-        [EnumMember(Value = "float")]
-        Float,
-
-        [EnumMember(Value = "boolean")]
-        Boolean,
     }
 
     public record SkaldConversation

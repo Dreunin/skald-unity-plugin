@@ -77,7 +77,7 @@ namespace Skald
             this.floatValue = floatValue;
         }
 
-        public static ExpressionResult FromVariable(Skald.Variable variable)
+        public static ExpressionResult FromVariable(DialogueEngine.Variable variable)
         {
             return variable.Type switch
             {

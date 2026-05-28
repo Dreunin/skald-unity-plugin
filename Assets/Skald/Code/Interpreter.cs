@@ -7,7 +7,7 @@ namespace Skald
     public static class Interpreter
     {
 
-        public static string InterpretRichText(RichTextProgram text, Dictionary<string, Skald.Variable> variables)
+        public static string InterpretRichText(RichTextProgram text, Dictionary<string, DialogueEngine.Variable> variables)
         {
             var output = "";
             foreach (var segment in text.Content)
@@ -17,7 +17,7 @@ namespace Skald
             return output;
         }
 
-        private static string InterpretRichTextSegment(RichTextSegment segment, Dictionary<string, Skald.Variable> variables)
+        private static string InterpretRichTextSegment(RichTextSegment segment, Dictionary<string, DialogueEngine.Variable> variables)
         {
             return segment switch
             {
@@ -28,7 +28,7 @@ namespace Skald
             };
         }
 
-        private static string InterpretTag(Tag tag, Dictionary<string, Skald.Variable> variables)
+        private static string InterpretTag(Tag tag, Dictionary<string, DialogueEngine.Variable> variables)
         {
             var content = "";
             foreach (var segment in tag.Content)
@@ -47,12 +47,11 @@ namespace Skald
             };
         }
 
-        private static string InterpretTagValue(Tag tag, Dictionary<string, Skald.Variable> variables)
+        private static string InterpretTagValue(Tag tag, Dictionary<string, DialogueEngine.Variable> variables)
         {
-            // TODO: Support tag values as templates
             return tag.Value switch
             {
-                Template template => throw new NotImplementedException(),
+                Template template => $"\"{InterpretTemplate(template, variables)}\"",
                 TagIdentifier tagIdentifier => $"\"{variables[tagIdentifier.Content].ToDisplayString()}\"",
                 TagColorHex tagColorHex => tagColorHex.Content,
                 TagString tagString => $"\"{tagString.Content}\"",
@@ -60,13 +59,13 @@ namespace Skald
             };
         }
 
-        private static string InterpretTemplate(Template template, Dictionary<string, Skald.Variable> variables)
+        private static string InterpretTemplate(Template template, Dictionary<string, DialogueEngine.Variable> variables)
         {
             var expressionResult = InterpretExpression(template.Content, variables);
             return expressionResult.ToDisplayString();
         }
 
-        public static ExpressionResult InterpretExpression(TypedExpression expression, Dictionary<string, Skald.Variable> variables)
+        public static ExpressionResult InterpretExpression(TypedExpression expression, Dictionary<string, DialogueEngine.Variable> variables)
         {
             switch (expression)
             {
@@ -92,7 +91,7 @@ namespace Skald
             }
         }
 
-        public static ExpressionResult InterpretBinaryExpression(TypedBinaryExpression binaryExpression, Dictionary<string, Skald.Variable> variables)
+        public static ExpressionResult InterpretBinaryExpression(TypedBinaryExpression binaryExpression, Dictionary<string, DialogueEngine.Variable> variables)
         {
             var left = InterpretExpression(binaryExpression.Left, variables);
             var right = InterpretExpression(binaryExpression.Right, variables);
@@ -115,7 +114,7 @@ namespace Skald
             };
         }
 
-        private static ExpressionResult InterpretUnaryExpression(TypedUnaryExpression unaryExpression, Dictionary<string, Skald.Variable> variables)
+        private static ExpressionResult InterpretUnaryExpression(TypedUnaryExpression unaryExpression, Dictionary<string, DialogueEngine.Variable> variables)
         {
             var value = InterpretExpression(unaryExpression.Expr, variables);
             return unaryExpression.Op switch
@@ -127,7 +126,7 @@ namespace Skald
 
         }
 
-        public static void InterpretAssignment(TypedAssignment assignment, Dictionary<string, Skald.Variable> variables)
+        public static void InterpretAssignment(TypedAssignment assignment, Dictionary<string, DialogueEngine.Variable> variables)
         {
             var variable = variables[assignment.Variable.Content];
             var value = InterpretExpression(assignment.Value, variables);

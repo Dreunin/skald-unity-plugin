@@ -1,13 +1,29 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace Skald.Code.Editor
 {
     internal static class SyncWithSkaldState
     {
+        private const string DeviceIdKey = "Skald.SyncWithSkald.DeviceId";
         private const string LoggedInKey = "Skald.SyncWithSkald.LoggedIn";
         private const string TokenKey = "Skald.SyncWithSkald.Token";
         private const string LogoSearchQuery = "SkaldLogo t:Texture2D";
+
+        public static string DeviceId
+        {
+            get
+            {
+                var deviceId = EditorPrefs.GetString(DeviceIdKey, null);
+                if (deviceId == null)
+                {
+                    deviceId = Guid.NewGuid().ToString();
+                    EditorPrefs.SetString(DeviceIdKey, deviceId);
+                }
+                return deviceId;
+            }
+        }
 
         public static bool IsLoggedIn // TODO: upgrade to OS keychain / credential manager storage
         {

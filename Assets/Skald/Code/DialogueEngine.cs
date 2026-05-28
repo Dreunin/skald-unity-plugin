@@ -28,13 +28,13 @@ namespace Skald
         public void EndConversation();
     }
 
-    public class Skald
+    public class DialogueEngine
     {
         private readonly IDialoguePresenter _dialoguePresenter;
         public EngineImport Project { get; private set; }
         public Dictionary<string, Variable> Variables { get; private set; } = new();
 
-        public Skald(IDialoguePresenter dialoguePresenter)
+        public DialogueEngine(IDialoguePresenter dialoguePresenter)
         {
             _dialoguePresenter = dialoguePresenter;
         }
@@ -55,29 +55,33 @@ namespace Skald
             {
                 switch (variable.VariableType)
                 {
-                    case SkaldVariableType.String:
+                    case TypeName.String:
                         Variables.Add(variable.Name, new Variable(variable.DefaultValue));
                         break;
-                    case SkaldVariableType.Integer:
+                    case TypeName.Integer:
                         Variables.Add(variable.Name, new Variable(int.Parse(variable.DefaultValue)));
                         break;
-                    case SkaldVariableType.Float:
+                    case TypeName.Float:
                         Variables.Add(variable.Name, new Variable(float.Parse(variable.DefaultValue)));
                         break;
-                    case SkaldVariableType.Boolean:
+                    case TypeName.Boolean:
                         Variables.Add(variable.Name, new Variable(bool.Parse(variable.DefaultValue)));
                         break;
                 }
             }
         }
 
-        public Conversation StartConversation(string title)
+        /// <summary>
+        /// Starts a conversation with the given title, optionally starting from a specific node.
+        /// The starting node can technically be any node, but if not provided, the first start node will be used.
+        /// </summary>
+        public Conversation StartConversation(string title, SkaldExportedNode startingNode = null)
         {
             var skaldConversation = Project.Conversations.First(c => c.Title == title);
-            if (skaldConversation == null) throw new System.Exception($"Conversation with title '{title}' not found.");
+            if (skaldConversation == null) throw new Exception($"Conversation with title '{title}' not found.");
 
-            var startingNode = skaldConversation.Data.Nodes.First(n => n is SkaldExportedStartNode); //TODO: Handle multiple start nodes
-            if (startingNode == null) throw new System.Exception($"No start node found for conversation '{title}'.");
+            startingNode ??= skaldConversation.Data.Nodes.First(n => n is SkaldExportedStartNode);
+            if (startingNode == null) throw new Exception($"No start node found for conversation '{title}'.");
 
             return new Conversation(skaldConversation, startingNode, ExecuteNode);
         }

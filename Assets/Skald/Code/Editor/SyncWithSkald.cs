@@ -18,6 +18,7 @@ namespace Skald.Code.Editor
         private const string ApiProjectListUrl = "api/engine-export/projects";
         private static string ApiCheckChallengeUrl(string challengeId) => $"api/engine-challenge/{challengeId}/check";
         private static string ApiExportProjectUrl(string projectId) => $"api/engine-export/projects/{projectId}";
+        private static string ApiRemoveTokenUrl => $"api/engine-token/remove";
 
         private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(3);
 
@@ -31,11 +32,6 @@ namespace Skald.Code.Editor
             {
                 HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SyncWithSkaldState.Token);
             }
-        }
-
-        private static string GetDeviceId()
-        {
-            return "very good id"; // TODO: Replace with some semi-secret local identifier that is constant for this device
         }
 
         // Called by the custom inspector when the user clicks Login
@@ -90,14 +86,16 @@ namespace Skald.Code.Editor
 
         public Task Logout()
         {
+            var task = HttpClient.GetAsync($"{BaseUrl}/{ApiRemoveTokenUrl}");
+            HttpClient.DefaultRequestHeaders.Authorization = null;
             SyncWithSkaldState.Logout();
-            return null;
+            return task;
         }
 
         private async Task<InitiateChallengeResponse> InitiateChallenge(string baseUrl)
         {
             var body = new Dictionary<string, string> {
-                {"deviceId", GetDeviceId()},
+                {"deviceId", SyncWithSkaldState.DeviceId},
                 {"requesterName", clientId}
             };
 
@@ -125,7 +123,7 @@ namespace Skald.Code.Editor
             while (new DateTime() < expiresAt)
             {
                 var body = new Dictionary<string, string>() {
-                    {"deviceId", GetDeviceId()}
+                    {"deviceId", SyncWithSkaldState.DeviceId}
                 };
 
                 var response = await HttpClient.PostAsync(
@@ -195,12 +193,6 @@ namespace Skald.Code.Editor
 
             [JsonProperty("token")]
             public string Token { get; set; }
-        }
-
-        private class ProjectResponse
-        {
-
-
         }
     }
 }
