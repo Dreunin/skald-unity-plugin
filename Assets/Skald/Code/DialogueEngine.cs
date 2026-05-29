@@ -5,6 +5,7 @@ using System.Linq;
 using Skald.Language;
 using System.Collections.Generic;
 using System;
+using UnityEngine;
 
 
 namespace Skald
@@ -53,21 +54,15 @@ namespace Skald
             Variables.Clear();
             foreach (var variable in Project.Variables)
             {
-                switch (variable.VariableType)
+                var newVariable = variable.Type switch
                 {
-                    case TypeName.String:
-                        Variables.Add(variable.Name, new Variable(variable.DefaultValue));
-                        break;
-                    case TypeName.Integer:
-                        Variables.Add(variable.Name, new Variable(int.Parse(variable.DefaultValue)));
-                        break;
-                    case TypeName.Float:
-                        Variables.Add(variable.Name, new Variable(float.Parse(variable.DefaultValue)));
-                        break;
-                    case TypeName.Boolean:
-                        Variables.Add(variable.Name, new Variable(bool.Parse(variable.DefaultValue)));
-                        break;
-                }
+                    TypeName.String => new Variable(variable.DefaultValue),
+                    TypeName.Integer => new Variable(int.Parse(variable.DefaultValue)),
+                    TypeName.Float => new Variable(float.Parse(variable.DefaultValue)),
+                    TypeName.Boolean => new Variable(bool.Parse(variable.DefaultValue)),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                Variables.Add(variable.Name, newVariable);
             }
         }
 
@@ -78,10 +73,7 @@ namespace Skald
         public Conversation StartConversation(string title)
         {
             var skaldConversation = Project.Conversations.First(c => c.Title == title);
-            if (skaldConversation == null) throw new Exception($"Conversation with title '{title}' not found.");
-
-            var startingNode = skaldConversation.Data.Nodes.First(n => n is SkaldExportedStartNode startNode && startNode.DefaultStart);
-            if (startingNode == null) throw new Exception($"No start node found for conversation '{title}'.");
+            var startingNode = skaldConversation.Data.Nodes.First(n => n is SkaldExportedStartNode { IsDefault: true });
 
             return new Conversation(skaldConversation, startingNode, ExecuteNode);
         }

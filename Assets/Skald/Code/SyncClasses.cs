@@ -45,8 +45,8 @@ namespace Skald.Import
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("variableType")]
-        public TypeName VariableType { get; set; }
+        [JsonProperty("type")]
+        public TypeName Type { get; set; }
 
         [JsonProperty("defaultValue")]
         public string DefaultValue { get; set; }
@@ -125,8 +125,9 @@ namespace Skald.Import
     {
         [JsonProperty("nextNode")]
         public string NextNode { get; set; }
-        [JsonProperty("defaultStart")]
-        public bool DefaultStart { get; set; }
+
+        [JsonProperty("isDefault")]
+        public bool IsDefault { get; set; }
     }
 
     public record SkaldExportedEndNode : SkaldExportedNode
