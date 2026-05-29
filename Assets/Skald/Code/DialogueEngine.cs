@@ -75,12 +75,12 @@ namespace Skald
         /// Starts a conversation with the given title, optionally starting from a specific node.
         /// The starting node can technically be any node, but if not provided, the first start node will be used.
         /// </summary>
-        public Conversation StartConversation(string title, SkaldExportedNode startingNode = null)
+        public Conversation StartConversation(string title)
         {
             var skaldConversation = Project.Conversations.First(c => c.Title == title);
             if (skaldConversation == null) throw new Exception($"Conversation with title '{title}' not found.");
 
-            startingNode ??= skaldConversation.Data.Nodes.First(n => n is SkaldExportedStartNode);
+            var startingNode = skaldConversation.Data.Nodes.First(n => n is SkaldExportedStartNode startNode && startNode.DefaultStart);
             if (startingNode == null) throw new Exception($"No start node found for conversation '{title}'.");
 
             return new Conversation(skaldConversation, startingNode, ExecuteNode);

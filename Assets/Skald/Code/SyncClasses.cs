@@ -125,6 +125,8 @@ namespace Skald.Import
     {
         [JsonProperty("nextNode")]
         public string NextNode { get; set; }
+        [JsonProperty("defaultStart")]
+        public bool DefaultStart { get; set; }
     }
 
     public record SkaldExportedEndNode : SkaldExportedNode
