@@ -10,6 +10,7 @@ namespace Skald.Code
     {
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private string projectPath;
+        [SerializeField] private string conversationTitle;
         private DialogueEngine _dialogueEngine;
         private DialogueEngine.Conversation conversation;
 
@@ -23,11 +24,11 @@ namespace Skald.Code
 
         public void Start()
         {
-            if(projectPath == null) throw new Exception("Project path is not set.");
+            if (projectPath == null) throw new Exception("Project path is not set.");
             BuildUI();
             _dialogueEngine = new DialogueEngine(this);
             _dialogueEngine.LoadProject(projectPath);
-            conversation = _dialogueEngine.StartConversation(_dialogueEngine.Project.Conversations.First().Title);
+            conversation = _dialogueEngine.StartConversation(conversationTitle.Equals("") ? _dialogueEngine.Project.Conversations.First().Title : conversationTitle);
         }
 
 
