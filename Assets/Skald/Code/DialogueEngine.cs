@@ -5,8 +5,6 @@ using System.Linq;
 using Skald.Language;
 using System.Collections.Generic;
 using System;
-using UnityEngine;
-
 
 namespace Skald
 {
@@ -40,6 +38,9 @@ namespace Skald
             _dialoguePresenter = dialoguePresenter;
         }
 
+        /// <summary>
+        /// Loads the project from the given path.
+        /// </summary>
         public void LoadProject(string path)
         {
             Project = JsonConvert.DeserializeObject<EngineImport>(File.ReadAllText(path), new JsonSerializerSettings
@@ -67,8 +68,8 @@ namespace Skald
         }
 
         /// <summary>
-        /// Starts a conversation with the given title, optionally starting from a specific node.
-        /// The starting node can technically be any node, but if not provided, the first start node will be used.
+        /// Starts a conversation with the given title.
+        /// TODO: Support multiple start nodes
         /// </summary>
         public Conversation StartConversation(string title)
         {
@@ -78,6 +79,14 @@ namespace Skald
             return new Conversation(skaldConversation, startingNode, ExecuteNode);
         }
 
+        /// <summary>
+        /// Executes a node and updates the dialogue presenter accordingly.
+        /// </summary>
+        /// <list type="bullet">
+        /// <item> Proceeds the conversation if the node has a next node. </item>
+        /// <item> Waits for user input if the node requires a player choice. </item>
+        /// <item> Ends the conversation if it is an end node. </item>
+        /// </list>
         private void ExecuteNode(SkaldExportedNode node, Conversation conversation)
         {
             switch (node)
@@ -85,12 +94,6 @@ namespace Skald
                 case SkaldExportedDialogueNode dialogueNode:
                     var character = dialogueNode.CharacterId != null ? Project.Characters.First(c => c.Id == dialogueNode.CharacterId) : null;
                     _dialoguePresenter.ShowDialogue(character, Interpreter.InterpretRichText(dialogueNode.Text, Variables));
-                    break;
-                case SkaldExportedStartNode:
-                    conversation.Continue();
-                    break;
-                case SkaldExportedEndNode:
-                    _dialoguePresenter.EndConversation();
                     break;
                 case SkaldExportedPlayerChoiceNode playerChoiceNode:
                     var options = playerChoiceNode.Choices.Select(choice =>
@@ -101,6 +104,12 @@ namespace Skald
                     }).ToArray();
                     _dialoguePresenter.ShowOptions(options);
                     break;
+                case SkaldExportedStartNode:
+                    conversation.Continue();
+                    break;
+                case SkaldExportedEndNode:
+                    _dialoguePresenter.EndConversation();
+                    break;
                 case SkaldExportedAssignmentNode assignmentNode:
                     Interpreter.InterpretAssignment(assignmentNode.Expression, Variables);
                     conversation.Continue();
@@ -108,6 +117,9 @@ namespace Skald
             }
         }
 
+        /// <summary>
+        /// Conversations hold the state of a conversation, such as the current node and the ability to continue or select options (player choices).
+        /// </summary>
         public class Conversation
         {
             private readonly SkaldConversation _skaldConversation;
@@ -132,20 +144,23 @@ namespace Skald
 
             public void Continue()
             {
-                if (_currentNode is not ISkaldContinuable continuable) throw new System.Exception("Current node is not a continuable node.");
-                if (continuable.NextNode == null) throw new System.Exception("No next node found.");
+                if (_currentNode is not ISkaldContinuable continuable) throw new Exception("Current node is not a continuable node.");
+                if (continuable.NextNode == null) throw new Exception("No next node found.");
                 _currentNode = _skaldConversation.Data.Nodes.First(n => n.Id == continuable.NextNode);
                 _executeNode(_currentNode, this);
             }
 
             public void SelectOption(int index)
             {
-                if (_currentNode is not SkaldExportedPlayerChoiceNode playerChoiceNode) throw new System.Exception("Current node is not a player choice node.");
+                if (_currentNode is not SkaldExportedPlayerChoiceNode playerChoiceNode) throw new Exception("Current node is not a player choice node.");
                 _currentNode = _skaldConversation.Data.Nodes.First(n => n.Id == playerChoiceNode.Choices[index].NextNode);
                 _executeNode(_currentNode, this);
             }
         }
 
+        /// <summary>
+        /// Skald variables can be of type string, boolean, integer or float.
+        /// </summary>
         public class Variable
         {
             public TypeName Type { get; }
