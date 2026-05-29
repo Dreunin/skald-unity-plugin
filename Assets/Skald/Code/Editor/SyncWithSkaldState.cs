@@ -16,11 +16,9 @@ namespace Skald.Code.Editor
             get
             {
                 var deviceId = EditorPrefs.GetString(DeviceIdKey, null);
-                if (deviceId == null)
-                {
-                    deviceId = Guid.NewGuid().ToString();
-                    EditorPrefs.SetString(DeviceIdKey, deviceId);
-                }
+                if (deviceId != null) return deviceId;
+                deviceId = Guid.NewGuid().ToString();
+                EditorPrefs.SetString(DeviceIdKey, deviceId);
                 return deviceId;
             }
         }
@@ -51,13 +49,13 @@ namespace Skald.Code.Editor
 
         public static Texture2D LoadLogoTexture()
         {
-            string[] guids = AssetDatabase.FindAssets(LogoSearchQuery);
+            var guids = AssetDatabase.FindAssets(LogoSearchQuery);
             if (guids == null || guids.Length == 0)
             {
                 return null;
             }
 
-            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var path = AssetDatabase.GUIDToAssetPath(guids[0]);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
     }
