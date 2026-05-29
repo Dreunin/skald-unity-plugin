@@ -24,7 +24,7 @@ namespace Skald.Code.Editor
 
         private const string DirectoryPath = "Assets/Resources/Skald";
 
-        private const string clientId = "unity";
+        private const string requesterName = "Unity";
 
         public SyncWithSkald()
         {
@@ -96,7 +96,7 @@ namespace Skald.Code.Editor
         {
             var body = new Dictionary<string, string> {
                 {"deviceId", SyncWithSkaldState.DeviceId},
-                {"requesterName", clientId}
+                {"requesterName", requesterName}
             };
 
             var response = await HttpClient.PostAsync(

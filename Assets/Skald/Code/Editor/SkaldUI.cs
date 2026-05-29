@@ -103,7 +103,7 @@ namespace Skald.Code.Editor
             disconnectButton.clicked += () => _ = HandleLogout();
             card.Add(disconnectButton);
 
-            getProjectsButton = CreateButton("Get Projects");
+            getProjectsButton = CreateButton("Get projects");
             getProjectsButton.clicked += () => _ = HandleGetProjects();
             card.Add(getProjectsButton);
 

@@ -946,7 +946,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6879187567728326831, guid: f258e7e43fbddf547ba85f2b45f2d44d, type: 3}
       propertyPath: projectPath
-      value: Assets/Resources/Skald/jfb8zhi1ib95iabsaxb6q0aj.json
+      value: Assets/Resources/Skald/kmilo1kc7dgi92wniwkhy49c.json
       objectReference: {fileID: 0}
     - target: {fileID: 7813389375790834492, guid: f258e7e43fbddf547ba85f2b45f2d44d, type: 3}
       propertyPath: m_Name
