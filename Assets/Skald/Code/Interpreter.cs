@@ -69,6 +69,8 @@ namespace Skald
         {
             switch (expression)
             {
+                case TypedTernaryExpression ternaryExpression:
+                    return InterpretTernaryExpression(ternaryExpression, variables);
                 case TypedBinaryExpression binaryExpression:
                     return InterpretBinaryExpression(binaryExpression, variables);
                 case TypedUnaryExpression unaryExpression:
@@ -89,6 +91,16 @@ namespace Skald
                 default:
                     return null;
             }
+        }
+
+        public static ExpressionResult InterpretTernaryExpression(TypedTernaryExpression ternaryExpression,
+            Dictionary<string, DialogueEngine.Variable> variables)
+        {
+            var conditionResult = InterpretExpression(ternaryExpression.Condition, variables);
+            if (conditionResult.Type != TypeName.Boolean) throw new Exception("Condition of ternary expression must be boolean");
+            return conditionResult.BooleanValue ?
+                InterpretExpression(ternaryExpression.ThenBranch, variables) : 
+                InterpretExpression(ternaryExpression.ElseBranch, variables);
         }
 
         public static ExpressionResult InterpretBinaryExpression(TypedBinaryExpression binaryExpression, Dictionary<string, DialogueEngine.Variable> variables)

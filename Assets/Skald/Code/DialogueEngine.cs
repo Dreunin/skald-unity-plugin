@@ -8,16 +8,10 @@ using System;
 
 namespace Skald
 {
-    public record Option
+    public record Option(string Text, bool IsAvailable)
     {
-        public string Text { get; }
-        public bool IsAvailable { get; }
-
-        public Option(string text, bool isAvailable)
-        {
-            Text = text;
-            IsAvailable = isAvailable;
-        }
+        public string Text { get; } = Text;
+        public bool IsAvailable { get; } = IsAvailable;
     }
 
     public interface IDialoguePresenter
@@ -114,6 +108,17 @@ namespace Skald
                     Interpreter.InterpretAssignment(assignmentNode.Expression, Variables);
                     conversation.Continue();
                     break;
+                case SkaldExportedConditionalNode conditionalNode:
+                    var nextNodeId = conditionalNode.DefaultNextNode;
+                    foreach (var condition in conditionalNode.Conditions)
+                    {
+                        if (!Interpreter.InterpretExpression(condition.Expression, Variables).BooleanValue) continue;
+                        nextNodeId = condition.NextNode;
+                        break;
+                    }
+                    conversation.SetCurrentNode(nextNodeId);
+                    ExecuteNode(conversation.GetCurrentNode(), conversation);
+                    break;
             }
         }
 
@@ -146,15 +151,25 @@ namespace Skald
             {
                 if (_currentNode is not ISkaldContinuable continuable) throw new Exception("Current node is not a continuable node.");
                 if (continuable.NextNode == null) throw new Exception("No next node found.");
-                _currentNode = _skaldConversation.Data.Nodes.First(n => n.Id == continuable.NextNode);
+                SetCurrentNode(continuable.NextNode);
                 _executeNode(_currentNode, this);
             }
 
             public void SelectOption(int index)
             {
                 if (_currentNode is not SkaldExportedPlayerChoiceNode playerChoiceNode) throw new Exception("Current node is not a player choice node.");
-                _currentNode = _skaldConversation.Data.Nodes.First(n => n.Id == playerChoiceNode.Choices[index].NextNode);
+                SetCurrentNode(playerChoiceNode.Choices[index].NextNode);
                 _executeNode(_currentNode, this);
+            }
+
+            public void SetCurrentNode(string id)
+            {
+                _currentNode = _skaldConversation.Data.Nodes.First(n => n.Id == id);
+            }
+            
+            public SkaldExportedNode GetCurrentNode()
+            {
+                return _currentNode;
             }
         }
 

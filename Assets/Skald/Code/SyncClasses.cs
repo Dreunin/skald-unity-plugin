@@ -164,6 +164,24 @@ namespace Skald.Import
         public string NextNode { get; set; }
     }
 
+    public record SkaldExportedConditionalNode : SkaldExportedNode
+    {
+        [JsonProperty("conditions")]
+        public SkaldExportedCondition[] Conditions { get; set; }
+        
+        [JsonProperty("defaultNextNode")]
+        public string DefaultNextNode { get; set; }
+    }
+
+    public record SkaldExportedCondition : ISkaldContinuable
+    {
+        [JsonProperty("expression")]
+        public TypedExpression Expression { get; set; }
+        
+        [JsonProperty("nextNode")]
+        public string NextNode { get; set; }
+    }
+
     public class SkaldExportedNodeConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
@@ -186,6 +204,7 @@ namespace Skald.Import
                 "end" => new SkaldExportedEndNode(),
                 "assignment" => new SkaldExportedAssignmentNode(),
                 "playerChoice" => new SkaldExportedPlayerChoiceNode(),
+                "conditional" => new SkaldExportedConditionalNode(),
                 _ => throw new JsonSerializationException(
                                         $"Unknown exported node type: {type}"),
             };

@@ -168,6 +168,18 @@ namespace Skald.Language
         public TypeName ResultType { get; set; }
     }
 
+    public record TypedTernaryExpression : TypedExpression
+    {
+        [JsonProperty("condition")]
+        public TypedExpression Condition { get; set; }
+        
+        [JsonProperty("thenBranch")]
+        public TypedExpression ThenBranch  { get; set; }
+        
+        [JsonProperty("elseBranch")]
+        public TypedExpression ElseBranch { get; set; }
+    }
+
     public record TypedBinaryExpression : TypedExpression
     {
         [JsonProperty("left")]
@@ -298,6 +310,7 @@ namespace Skald.Language
                 "Identifier" => new TypedIdentifier(),
                 "BooleanLiteral" => new TypedBooleanLiteral(),
                 "ParenthesizedExpression" => new TypedParenthesizedExpression(),
+                "TernaryExpression" => new TypedTernaryExpression(),
                 _ => throw new JsonSerializationException(
                                         $"Unknown typed expression type: {type}"),
             };
