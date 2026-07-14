@@ -13,7 +13,7 @@ namespace Skald.Code.Editor
     public class SyncWithSkald
     {
         private static readonly HttpClient HttpClient = new();
-        private const string BaseUrl = "http://localhost:9999";
+        private const string BaseUrl = "shttps://skald.dual-daggers.com/";
         private const string ApiInitiateChallengeUrl = "api/engine-challenge/initiate";
         private const string ApiProjectListUrl = "api/engine-export/projects";
         private static string ApiCheckChallengeUrl(string challengeId) => $"api/engine-challenge/{challengeId}/check";
