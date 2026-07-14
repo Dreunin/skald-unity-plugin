@@ -63,7 +63,6 @@ namespace Skald
 
         /// <summary>
         /// Starts a conversation with the given title.
-        /// TODO: Support multiple start nodes
         /// </summary>
         public Conversation StartConversation(string title)
         {
