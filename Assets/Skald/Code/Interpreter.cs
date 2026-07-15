@@ -1,4 +1,5 @@
 using Skald.Language;
+using Skald.Import;
 using System;
 using System.Collections.Generic;
 
@@ -7,33 +8,43 @@ namespace Skald
     public static class Interpreter
     {
 
-        public static string InterpretRichText(RichTextProgram text, Dictionary<string, DialogueEngine.Variable> variables)
+        public static string InterpretRichText(
+            RichTextProgram text,
+            Dictionary<string, DialogueEngine.Variable> variables,
+            MentionContext mentions = null)
         {
             var output = "";
             foreach (var segment in text.Content)
             {
-                output += InterpretRichTextSegment(segment, variables);
+                output += InterpretRichTextSegment(segment, variables, mentions);
             }
             return output;
         }
 
-        private static string InterpretRichTextSegment(RichTextSegment segment, Dictionary<string, DialogueEngine.Variable> variables)
+        private static string InterpretRichTextSegment(
+            RichTextSegment segment,
+            Dictionary<string, DialogueEngine.Variable> variables,
+            MentionContext mentions)
         {
             return segment switch
             {
                 RichTextContent content => content.Content,
-                Tag tag => InterpretTag(tag, variables),
+                Tag tag => InterpretTag(tag, variables, mentions),
                 Template template => InterpretTemplate(template, variables),
+                Mention mention => mentions?.Resolve(mention) ?? mention.Name ?? string.Empty,
                 _ => throw new NotImplementedException()
             };
         }
 
-        private static string InterpretTag(Tag tag, Dictionary<string, DialogueEngine.Variable> variables)
+        private static string InterpretTag(
+            Tag tag,
+            Dictionary<string, DialogueEngine.Variable> variables,
+            MentionContext mentions)
         {
             var content = "";
             foreach (var segment in tag.Content)
             {
-                content += InterpretRichTextSegment(segment, variables);
+                content += InterpretRichTextSegment(segment, variables, mentions);
             }
 
             return tag.Name switch

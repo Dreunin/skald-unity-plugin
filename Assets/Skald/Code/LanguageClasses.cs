@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using Skald.Import;
 
 namespace Skald.Language
 {
@@ -127,6 +128,18 @@ namespace Skald.Language
     {
         [JsonProperty("content")]
         public TypedExpression Content { get; set; }
+    }
+    
+    public record Mention : RichTextSegment
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("mentionableType")]
+        public string MentionableType { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
     }
 
     public record TagAttribute : RawNodeBase
@@ -269,6 +282,7 @@ namespace Skald.Language
                 "RichTextContent" => new RichTextContent(),
                 "Tag" => new Tag(),
                 "Template" => new Template(),
+                "Mention" => new Mention(),
                 _ => throw new JsonSerializationException(
                                         $"Unknown rich text segment type: {type}"),
             };
