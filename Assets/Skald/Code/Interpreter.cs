@@ -39,17 +39,7 @@ namespace Skald
         private static string InterpretMention(MentionContext mentionContext, Mention mention)
         {
             IMentionable mentionable = mentionContext.Resolve(mention.Id);
-            return mentionable switch
-            {
-                SkaldCharacter character => InterpretCharacterMention(character),
-                SkaldLore lore => lore.Name,
-                _ => throw new NotImplementedException()
-            };
-        }
-
-        private static string InterpretCharacterMention(SkaldCharacter character)
-        {
-            return $"<color={character.Color}>{character.Name}</color>";
+            return mentionable.DisplayMention();
         }
 
         private static string InterpretTag(

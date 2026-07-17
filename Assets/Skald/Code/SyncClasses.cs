@@ -84,7 +84,7 @@ namespace Skald.Import
     {
         string Id { get; }
         string Name { get; }
-        string Type { get; }
+        string DisplayMention();
     }
 
     public record SkaldCharacter : IMentionable
@@ -95,14 +95,16 @@ namespace Skald.Import
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("type")]
-        public string Type { get; }
-
         [JsonProperty("color")]
         public string Color { get; set; }
 
         [JsonProperty("description")]
         public string Description { get; set; }
+        
+        public string DisplayMention()
+        {
+            return $"<color={Color}>{Name}</color>";
+        }
     }
 
     public record SkaldLore : IMentionable
@@ -118,6 +120,11 @@ namespace Skald.Import
 
         [JsonProperty("description")]
         public string Description { get; set; }
+        
+        public string DisplayMention()
+        {
+            return Name;
+        }
     }
 
     public record SkaldProject
@@ -223,18 +230,11 @@ namespace Skald.Import
     public class MentionContext
     {
         private readonly Dictionary<string, IMentionable> _mentionableById;
-        private readonly HashSet<string> _loreTypes;
 
         public MentionContext(IMentionable[] mentionables)
         {
             _mentionableById = mentionables
                 .ToDictionary(m => m.Id, m => m);
-
-            _loreTypes = new HashSet<string>(
-                mentionables
-                    .Where(m => m is { Type: "lore" })
-                    .Select(m => m.Type)
-            );
         }
 
         public IMentionable Resolve(string id)
