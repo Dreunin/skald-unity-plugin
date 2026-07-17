@@ -35,6 +35,8 @@ namespace Skald.Import
         [JsonProperty("conversations")]
         public SkaldConversation[] Conversations { get; set; }
     }
+    
+    
 
     public record SkaldTag
     {
@@ -77,14 +79,24 @@ namespace Skald.Import
         [JsonProperty("nodes")]
         public SkaldExportedNode[] Nodes { get; set; }
     }
+    
+    public interface IMentionable
+    {
+        string Id { get; }
+        string Name { get; }
+        string Type { get; }
+    }
 
-    public record SkaldCharacter
+    public record SkaldCharacter : IMentionable
     {
         [JsonProperty("id")]
         public string Id { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; }
 
         [JsonProperty("color")]
         public string Color { get; set; }
@@ -93,7 +105,7 @@ namespace Skald.Import
         public string Description { get; set; }
     }
 
-    public record SkaldLore
+    public record SkaldLore : IMentionable
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -210,63 +222,27 @@ namespace Skald.Import
 
     public class MentionContext
     {
-        private readonly Dictionary<string, SkaldCharacter> _charactersById;
-        private readonly Dictionary<string, SkaldLore> _loreById;
+        private readonly Dictionary<string, IMentionable> _mentionableById;
         private readonly HashSet<string> _loreTypes;
 
-        public MentionContext(SkaldCharacter[] characters, SkaldLore[] lore)
+        public MentionContext(IMentionable[] mentionables)
         {
-            _charactersById = (characters ?? Array.Empty<SkaldCharacter>())
-                .ToDictionary(character => character.Id);
-            _loreById = (lore ?? Array.Empty<SkaldLore>())
-                .ToDictionary(loreItem => loreItem.Id);
+            _mentionableById = mentionables
+                .ToDictionary(m => m.Id, m => m);
+
             _loreTypes = new HashSet<string>(
-                (lore ?? Array.Empty<SkaldLore>()).Select(loreItem => loreItem.Type));
+                mentionables
+                    .Where(m => m is { Type: "lore" })
+                    .Select(m => m.Type)
+            );
         }
 
-        public string Resolve(Mention mention)
+        public IMentionable Resolve(string id)
         {
-            if (mention == null)
-            {
-                return string.Empty;
-            }
-
-            if (!string.IsNullOrEmpty(mention.Id))
-            {
-                if (IsCharacterMention(mention) &&
-                    _charactersById.TryGetValue(mention.Id, out var character))
-                {
-                    return character.Name;
-                }
-
-                if (IsLoreMention(mention) &&
-                    _loreById.TryGetValue(mention.Id, out var loreItem))
-                {
-                    return loreItem.Name;
-                }
-
-                if (_charactersById.TryGetValue(mention.Id, out var fallbackCharacter))
-                {
-                    return fallbackCharacter.Name;
-                }
-
-                if (_loreById.TryGetValue(mention.Id, out var fallbackLore))
-                {
-                    return fallbackLore.Name;
-                }
-            }
-
-            return mention.Name ?? string.Empty;
+            return _mentionableById.TryGetValue(id, out var resolved)
+                ? resolved
+                : throw new Exception($"Mentionable with ID {id} not found.");;
         }
-
-        private bool IsCharacterMention(Mention mention) =>
-            string.IsNullOrEmpty(mention.MentionableType) ||
-            mention.MentionableType == "character";
-
-        private bool IsLoreMention(Mention mention) =>
-            mention.MentionableType == "lore" ||
-            (!string.IsNullOrEmpty(mention.MentionableType) &&
-             _loreTypes.Contains(mention.MentionableType));
     }
 
     public class SkaldExportedNodeConverter : JsonConverter

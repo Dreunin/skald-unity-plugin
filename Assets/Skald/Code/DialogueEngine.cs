@@ -42,7 +42,9 @@ namespace Skald
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
-            _mentionContext = new MentionContext(Project.Characters, Project.Lore);
+            IMentionable[] mentionables = Project.Characters.ToArray<IMentionable>();
+            mentionables = mentionables.Concat(Project.Lore).ToArray();
+            _mentionContext = new MentionContext(mentionables);
             ResetVariables();
         }
 

@@ -31,9 +31,25 @@ namespace Skald
                 RichTextContent content => content.Content,
                 Tag tag => InterpretTag(tag, variables, mentions),
                 Template template => InterpretTemplate(template, variables),
-                Mention mention => mentions?.Resolve(mention) ?? mention.Name ?? string.Empty,
+                Mention mention => InterpretMention(mentions, mention),
                 _ => throw new NotImplementedException()
             };
+        }
+
+        private static string InterpretMention(MentionContext mentionContext, Mention mention)
+        {
+            IMentionable mentionable = mentionContext.Resolve(mention.Id);
+            return mentionable switch
+            {
+                SkaldCharacter character => InterpretCharacterMention(character),
+                SkaldLore lore => lore.Name,
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private static string InterpretCharacterMention(SkaldCharacter character)
+        {
+            return $"<color={character.Color}>{character.Name}</color>";
         }
 
         private static string InterpretTag(
