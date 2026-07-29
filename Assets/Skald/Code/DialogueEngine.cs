@@ -24,6 +24,7 @@ namespace Skald
     public class DialogueEngine
     {
         private readonly IDialoguePresenter _dialoguePresenter;
+        private MentionContext _mentionContext;
         public EngineImport Project { get; private set; }
         public Dictionary<string, Variable> Variables { get; private set; } = new();
 
@@ -41,6 +42,9 @@ namespace Skald
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
+            IMentionable[] mentionables = Project.Characters.ToArray<IMentionable>();
+            mentionables = mentionables.Concat(Project.Lore).ToArray();
+            _mentionContext = new MentionContext(mentionables);
             ResetVariables();
         }
 
@@ -86,12 +90,12 @@ namespace Skald
             {
                 case SkaldExportedDialogueNode dialogueNode:
                     var character = dialogueNode.CharacterId != null ? Project.Characters.First(c => c.Id == dialogueNode.CharacterId) : null;
-                    _dialoguePresenter.ShowDialogue(character, Interpreter.InterpretRichText(dialogueNode.Text, Variables));
+                    _dialoguePresenter.ShowDialogue(character, Interpreter.InterpretRichText(dialogueNode.Text, Variables, _mentionContext));
                     break;
                 case SkaldExportedPlayerChoiceNode playerChoiceNode:
                     var options = playerChoiceNode.Choices.Select(choice =>
                     {
-                        var text = Interpreter.InterpretRichText(choice.Text, Variables);
+                        var text = Interpreter.InterpretRichText(choice.Text, Variables, _mentionContext);
                         var isAvailable = choice.Precondition == null || Interpreter.InterpretExpression(choice.Precondition, Variables).BooleanValue;
                         return new Option(text, isAvailable);
                     }).ToArray();

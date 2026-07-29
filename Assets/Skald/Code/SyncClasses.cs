@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -27,9 +29,14 @@ namespace Skald.Import
         [JsonProperty("variables")]
         public SkaldVariable[] Variables { get; set; }
 
+        [JsonProperty("lore")]
+        public SkaldLore[] Lore { get; set; }
+
         [JsonProperty("conversations")]
         public SkaldConversation[] Conversations { get; set; }
     }
+    
+    
 
     public record SkaldTag
     {
@@ -60,6 +67,9 @@ namespace Skald.Import
         [JsonProperty("title")]
         public string Title { get; set; }
 
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
         [JsonProperty("data")]
         public SkaldConversationData Data { get; set; }
     }
@@ -69,8 +79,15 @@ namespace Skald.Import
         [JsonProperty("nodes")]
         public SkaldExportedNode[] Nodes { get; set; }
     }
+    
+    public interface IMentionable
+    {
+        string Id { get; }
+        string Name { get; }
+        string DisplayMention();
+    }
 
-    public record SkaldCharacter
+    public record SkaldCharacter : IMentionable
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -80,6 +97,34 @@ namespace Skald.Import
 
         [JsonProperty("color")]
         public string Color { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+        
+        public string DisplayMention()
+        {
+            return $"<color={Color}>{Name}</color>";
+        }
+    }
+
+    public record SkaldLore : IMentionable
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+        
+        public string DisplayMention()
+        {
+            return Name;
+        }
     }
 
     public record SkaldProject
@@ -180,6 +225,24 @@ namespace Skald.Import
         
         [JsonProperty("nextNode")]
         public string NextNode { get; set; }
+    }
+
+    public class MentionContext
+    {
+        private readonly Dictionary<string, IMentionable> _mentionableById;
+
+        public MentionContext(IMentionable[] mentionables)
+        {
+            _mentionableById = mentionables
+                .ToDictionary(m => m.Id, m => m);
+        }
+
+        public IMentionable Resolve(string id)
+        {
+            return _mentionableById.TryGetValue(id, out var resolved)
+                ? resolved
+                : throw new Exception($"Mentionable with ID {id} not found.");;
+        }
     }
 
     public class SkaldExportedNodeConverter : JsonConverter

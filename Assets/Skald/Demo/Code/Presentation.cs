@@ -75,6 +75,7 @@ namespace Skald.Code
         {
             conversation = null;
             root.Clear();
+            Debug.Log("Conversation ended.");
         }
 
 
