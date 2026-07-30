@@ -91,3 +91,7 @@ Assets/Resources/Skald/      # Imported project JSON (created on sync)
 
 - **Skald (authoring):** [skald.dual-daggers.com](https://skald.dual-daggers.com)
 - **Skald Documentation::** [docs.skald.dual-daggers.com](https://docs.skald.dual-daggers.com)
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
